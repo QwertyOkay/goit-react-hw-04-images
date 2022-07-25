@@ -1,25 +1,41 @@
-import { useEffect } from 'react';
-import styles from './Modal.module.css';
+import { BackDrop, ModalWindow } from './styled.module';
+import React, { useEffect } from 'react';
+import { PropTypes } from 'prop-types';
 
-export const Modal = ({ handleCloseModal, bigImg }) => {
-  const onCloseModal = e => {
-    if (e.code === 'Escape' || e.target.nodeName === 'DIV') {
-      handleCloseModal();
-      document.removeEventListener('keydown', onCloseModal);
-      document.removeEventListener('click', onCloseModal);
+const Modal = ({ data: { tags, largeImageURL }, close }) => {
+  useEffect(() => {
+    const handleKeyDown = e => {
+      if (e.code === 'Escape') {
+        close();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    console.log();
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [close]);
+
+  const handleBackdropclick = e => {
+    if (e.target === e.currentTarget) {
+      close();
     }
   };
 
-  useEffect(() => {
-    document.addEventListener('keydown', onCloseModal);
-    document.addEventListener('click', onCloseModal);
-  });
-
   return (
-    <div className={styles.Overlay}>
-      <div className={styles.Modal}>
-        <img src={bigImg} alt="big preview" />
-      </div>
-    </div>
+    <BackDrop className="overlay" onClick={handleBackdropclick}>
+      <ModalWindow className="modal">
+        <img src={largeImageURL} alt={tags} width="1000" />
+      </ModalWindow>
+    </BackDrop>
   );
+};
+
+export default Modal;
+
+Modal.propTypes = {
+  close: PropTypes.func.isRequired,
+  data: PropTypes.shape({
+    largeImageURL: PropTypes.string.isRequired,
+    tags: PropTypes.string.isRequired,
+  }),
 };
